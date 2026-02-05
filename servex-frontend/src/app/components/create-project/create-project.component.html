@@ -1,0 +1,103 @@
+<!-- src/app/components/create-project/create-project.component.html -->
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Create New Project</h2>
+      <button class="close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #projectForm="ngForm">
+      <div class="form-group">
+        <label for="name">Project Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="formData.name"
+          placeholder="e.g. Company Website Redesign"
+          required
+          [disabled]="loading"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="service">Service Required</label>
+        <select
+          id="service"
+          name="service"
+          [(ngModel)]="formData.service"
+          required
+          [disabled]="loading"
+        >
+          <option value="" disabled>Select a service...</option>
+          @for (service of services; track service) {
+            <option [value]="service">{{ service }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="budget">Estimated Budget</label>
+        <select
+          id="budget"
+          name="budget"
+          [(ngModel)]="formData.budget"
+          required
+          [disabled]="loading"
+        >
+          <option value="" disabled>Select a range...</option>
+          @for (budget of budgets; track budget) {
+            <option [value]="budget">{{ budget }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Project Description</label>
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="formData.description"
+          rows="4"
+          placeholder="Briefly describe what you want to achieve..."
+          required
+          [disabled]="loading"
+        ></textarea>
+      </div>
+
+      @if (errorMessage) {
+        <div class="error-message">
+          ⚠️ {{ errorMessage }}
+        </div>
+      }
+
+      @if (successMessage) {
+        <div class="success-message">
+          ✅ {{ successMessage }}
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="closeModal()"
+          [disabled]="loading"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn-main"
+          [disabled]="loading || !projectForm.valid"
+        >
+          @if (loading) {
+            Creating...
+          } @else {
+            Create Project
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

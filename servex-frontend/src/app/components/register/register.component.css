@@ -1,0 +1,122 @@
+/* src/app/components/register/register.component.css */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 1rem 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 500px;
+  padding: 3rem;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.auth-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.auth-header p {
+  color: var(--text-gray);
+  font-size: 0.95rem;
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.auth-footer p {
+  color: var(--text-gray);
+}
+
+.link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Google Sign-In Button */
+.divider {
+  text-align: center;
+  margin: 2rem 0 1.5rem;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.divider span {
+  background: white;
+  padding: 0 1rem;
+  color: var(--text-gray);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.btn-google {
+  width: 100%;
+  padding: 1rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-family: var(--font);
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+
+.btn-google:hover {
+  border-color: #4285F4;
+  box-shadow: 0 4px 15px rgba(66, 133, 244, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn-google:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

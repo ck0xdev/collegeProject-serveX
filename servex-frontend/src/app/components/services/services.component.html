@@ -1,0 +1,52 @@
+<!-- src/app/components/services/services.component.html -->
+<app-navbar></app-navbar>
+
+<div class="blob blob-1"></div>
+
+<div class="services-container">
+  <!-- Header Section -->
+  <section class="services-header">
+    <h1>Simple Pricing.<br>Expert Results.</h1>
+    <p>Choose the package that fits your scale.</p>
+  </section>
+
+  <!-- Pricing Grid -->
+  <section class="pricing-section">
+    <div class="pricing-grid">
+      @for (plan of plans; track plan.name) {
+        <div class="glass-card pricing-card" [class.popular]="plan.popular">
+          @if (plan.popular) {
+            <div class="popular-badge">MOST POPULAR</div>
+          }
+          
+          <h3>{{ plan.name }}</h3>
+          <div class="price">{{ plan.price }}</div>
+          <p class="plan-description">{{ plan.description }}</p>
+          
+          <ul class="features-list">
+            @for (feature of plan.features; track feature) {
+              <li>{{ feature }}</li>
+            }
+          </ul>
+          
+          <button 
+            class="btn-main btn-full"
+            [class.btn-popular]="plan.popular"
+            routerLink="/register"
+          >
+            Select {{ plan.name }}
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="glass-card cta-card">
+      <h2>Not sure which plan to choose?</h2>
+      <p>Contact us for a free consultation and we'll help you find the perfect solution.</p>
+      <button class="btn-main" routerLink="/register">Get Started</button>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,26 @@
+<!-- src/app/components/navbar/navbar.component.html -->
+<nav>
+  <div class="brand" routerLink="/">
+    Serve<span>X</span>.
+  </div>
+
+  <ul class="nav-links">
+    <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a></li>
+    <li><a routerLink="/services" routerLinkActive="active">Services</a></li>
+    @if (isLoggedIn) {
+      <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+    }
+  </ul>
+
+  <div class="nav-actions">
+    @if (!isLoggedIn) {
+      <a routerLink="/login" class="login-link">Log In</a>
+      <a routerLink="/register" class="btn-main">Get Started</a>
+    } @else {
+      <div class="user-info">
+        <span class="user-name">{{ currentUser?.name }}</span>
+        <button (click)="logout()" class="btn-logout">Logout</button>
+      </div>
+    }
+  </div>
+</nav>

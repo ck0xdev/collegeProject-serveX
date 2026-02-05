@@ -1,0 +1,95 @@
+/* src/app/components/verify-otp/verify-otp.component.css */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 1rem 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 500px;
+  padding: 3rem;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.email-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.auth-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.auth-header p {
+  color: var(--text-gray);
+  font-size: 0.95rem;
+}
+
+.email-display {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.otp-input {
+  text-align: center;
+  font-size: 2rem;
+  letter-spacing: 0.5rem;
+  font-weight: 700;
+}
+
+.input-hint {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.auth-footer p {
+  color: var(--text-gray);
+}
+
+.resend-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 0.5rem;
+  font-family: var(--font);
+}
+
+.resend-btn:hover {
+  color: #0284c7;
+}
+
+.resend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

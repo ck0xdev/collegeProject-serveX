@@ -1,0 +1,121 @@
+<!-- src/app/components/dashboard/dashboard.component.html -->
+<app-navbar></app-navbar>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="dashboard-container">
+  <!-- Dashboard Header -->
+  <header class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Welcome back, {{ currentUser?.name }}! Here's your project overview.</p>
+    </div>
+    <button class="btn-main" (click)="showCreateProject = true">
+      + New Project
+    </button>
+  </header>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="color: var(--accent);">⚡</div>
+      <div class="stat-info">
+        <h4>Active Projects</h4>
+        <div class="stat-number">{{ stats.activeProjects }}</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="color: #f59e0b;">⏳</div>
+      <div class="stat-info">
+        <h4>Pending Tasks</h4>
+        <div class="stat-number">{{ stats.pendingTasks }}</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="color: #10b981;">💰</div>
+      <div class="stat-info">
+        <h4>Total Invested</h4>
+        <div class="stat-number">${{ stats.totalInvested.toLocaleString() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity Section -->
+  <section class="activity-section">
+    <div class="section-header-with-action">
+      <h3>Recent Activity</h3>
+      <button class="btn-main" (click)="showCreateProject = true">+ New Project</button>
+    </div>
+    
+    @if (loading) {
+      <div class="glass-card loading-state">
+        <p>Loading projects...</p>
+      </div>
+    } @else if (projects.length === 0) {
+      <div class="glass-card empty-state">
+        <div class="empty-icon">📁</div>
+        <h3>No Projects Yet</h3>
+        <p>Start your first project with ServeX today!</p>
+        <button class="btn-main" routerLink="/services">Browse Services</button>
+      </div>
+    } @else {
+      <div class="glass-card table-container">
+        <table class="projects-table">
+          <thead>
+            <tr>
+              <th>Project Name</th>
+              <th>Service</th>
+              <th>Date</th>
+              <th>Budget</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (project of projects; track project.id) {
+              <tr>
+                <td>
+                  <div class="project-name">{{ project.name }}</div>
+                  <div class="project-desc">{{ project.description }}</div>
+                </td>
+                <td>{{ project.service }}</td>
+                <td>{{ formatDate(project.createdAt) }}</td>
+                <td class="amount">{{ project.budget }}</td>
+                <td>
+                  <span [class]="'badge ' + getStatusClass(project.status)">
+                    {{ getStatusText(project.status) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="quick-actions">
+    <div class="glass-card action-card">
+      <h3>Need Help?</h3>
+      <p>Our support team is available 24/7 to assist you with any questions.</p>
+      <button class="btn-main">Contact Support</button>
+    </div>
+
+    <div class="glass-card action-card">
+      <h3>Start New Project</h3>
+      <p>Have a new idea? Let's bring it to life together.</p>
+      <button class="btn-main" routerLink="/services">View Services</button>
+    </div>
+  </section>
+</div>
+
+<!-- Create Project Modal -->
+@if (showCreateProject) {
+  <app-create-project
+    (close)="showCreateProject = false"
+    (projectCreated)="onProjectCreated()"
+  ></app-create-project>
+}

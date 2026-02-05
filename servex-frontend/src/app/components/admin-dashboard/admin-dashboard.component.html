@@ -1,0 +1,289 @@
+<!-- src/app/components/admin-dashboard/admin-dashboard.component.html -->
+
+<!-- Custom Admin Navbar -->
+<nav class="admin-navbar">
+  <div class="nav-brand">
+    <span class="brand-icon">⚡</span>
+    <span class="brand-text">ServeX <span class="admin-label">ADMIN</span></span>
+  </div>
+
+  <div class="nav-actions">
+    <div class="admin-info">
+      <span class="admin-name">{{ currentUser?.name }}</span>
+      <span class="admin-role">Administrator</span>
+    </div>
+    <button class="btn-logout" (click)="logout()">
+      🚪 Logout
+    </button>
+  </div>
+</nav>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="admin-container">
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>Manage all client projects and requests</p>
+    </div>
+    <div class="admin-badge">
+      <span class="crown-icon">👑</span>
+      <span>Administrator</span>
+    </div>
+  </header>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="color: var(--accent);">📊</div>
+      <div class="stat-content">
+        <h3>Total Projects</h3>
+        <div class="stat-number">{{ stats.totalProjects }}</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="color: #f59e0b;">⏳</div>
+      <div class="stat-content">
+        <h3>Pending Requests</h3>
+        <div class="stat-number">{{ stats.pendingRequests }}</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="color: #0ea5e9;">🚀</div>
+      <div class="stat-content">
+        <h3>Active Projects</h3>
+        <div class="stat-number">{{ stats.activeProjects }}</div>
+      </div>
+    </div>
+
+    <div class="glass-card stat-card">
+      <div class="stat-icon" style="color: #10b981;">💰</div>
+      <div class="stat-content">
+        <h3>Total Revenue</h3>
+        <div class="stat-number">${{ stats.totalRevenue.toLocaleString() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-tabs">
+      <button 
+        [class.active]="filterStatus === 'all'"
+        (click)="filterStatus = 'all'"
+      >
+        All Projects
+      </button>
+      <button 
+        [class.active]="filterStatus === 'pending'"
+        (click)="filterStatus = 'pending'"
+      >
+        Pending ({{ stats.pendingRequests }})
+      </button>
+      <button 
+        [class.active]="filterStatus === 'accepted'"
+        (click)="filterStatus = 'accepted'"
+      >
+        Accepted
+      </button>
+      <button 
+        [class.active]="filterStatus === 'in-progress'"
+        (click)="filterStatus = 'in-progress'"
+      >
+        In Progress
+      </button>
+      <button 
+        [class.active]="filterStatus === 'completed'"
+        (click)="filterStatus = 'completed'"
+      >
+        Completed
+      </button>
+    </div>
+  </div>
+
+  <!-- Projects Table -->
+  @if (loading) {
+    <div class="glass-card loading-state">
+      <div class="spinner"></div>
+      <p>Loading projects...</p>
+    </div>
+  } @else if (filteredProjects.length === 0) {
+    <div class="glass-card empty-state">
+      <div class="empty-icon">📂</div>
+      <h3>No Projects Found</h3>
+      <p>No projects match the selected filter.</p>
+    </div>
+  } @else {
+    <div class="glass-card table-card">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Project Name</th>
+            <th>Service</th>
+            <th>Budget</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (project of filteredProjects; track project.id) {
+            <tr>
+              <td>
+                <div class="client-info">
+                  <div class="client-avatar">{{ (project.clientName || 'C').charAt(0) }}</div>
+                  <div>
+                    <div class="client-name">{{ project.clientName || 'Client' }}</div>
+                    <div class="client-email">{{ project.clientEmail }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="project-name">{{ project.name }}</div>
+                <div class="project-desc">{{ project.description }}</div>
+              </td>
+              <td>{{ project.service }}</td>
+              <td class="budget">{{ project.amount || project.budget }}</td>
+              <td>
+                <span [class]="'status-badge ' + getStatusClass(project.status)">
+                  {{ project.status }}
+                </span>
+              </td>
+              <td>{{ formatDate(project.createdAt) }}</td>
+              <td>
+                <button 
+                  class="btn-manage"
+                  (click)="openProjectModal(project)"
+                >
+                  Manage
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- Project Management Modal -->
+@if (showProjectModal && selectedProject) {
+  <div class="modal-overlay" (click)="closeProjectModal()">
+    <div class="modal-content large-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Manage Project</h2>
+        <button class="close-btn" (click)="closeProjectModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Project Info -->
+        <div class="project-info-section">
+          <h3>{{ selectedProject.name }}</h3>
+          <p class="description">{{ selectedProject.description }}</p>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Client:</span>
+              <span class="value">{{ selectedProject.clientName || 'Client' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Email:</span>
+              <span class="value">{{ selectedProject.clientEmail }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Service:</span>
+              <span class="value">{{ selectedProject.service }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Requested Budget:</span>
+              <span class="value">{{ selectedProject.budget }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Submitted:</span>
+              <span class="value">{{ formatDate(selectedProject.createdAt) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Current Status:</span>
+              <span class="value">{{ selectedProject.status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Update Form -->
+        <form class="update-form">
+          <div class="form-group">
+            <label>Project Status</label>
+            <select [(ngModel)]="updateData.status" name="status">
+              <option value="pending">Pending Review</option>
+              <option value="accepted">Accepted</option>
+              <option value="in-progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
+          @if (updateData.status === 'in-progress' || updateData.status === 'completed') {
+            <div class="form-group">
+              <label>Progress ({{ updateData.progress }}%)</label>
+              <input 
+                type="range" 
+                [(ngModel)]="updateData.progress"
+                name="progress"
+                min="0" 
+                max="100"
+                class="progress-slider"
+              />
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Final Amount</label>
+            <input 
+              type="text" 
+              [(ngModel)]="updateData.amount"
+              name="amount"
+              placeholder="e.g. $2,500"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Admin Notes</label>
+            <textarea 
+              [(ngModel)]="updateData.adminNotes"
+              name="adminNotes"
+              rows="4"
+              placeholder="Add notes for the client..."
+            ></textarea>
+          </div>
+        </form>
+
+        <!-- Quick Actions -->
+        @if (selectedProject.status === 'pending') {
+          <div class="quick-actions">
+            <button class="btn-accept" (click)="acceptProject()">
+              ✅ Accept Project
+            </button>
+            <button class="btn-reject" (click)="rejectProject()">
+              ❌ Reject Project
+            </button>
+          </div>
+        }
+
+        <!-- Update Button -->
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="closeProjectModal()">
+            Cancel
+          </button>
+          <button class="btn-main" (click)="updateProject()">
+            💾 Update Project
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

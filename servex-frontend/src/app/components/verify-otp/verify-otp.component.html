@@ -1,0 +1,76 @@
+<!-- src/app/components/verify-otp/verify-otp.component.html -->
+<app-navbar></app-navbar>
+
+<div class="blob blob-1"></div>
+
+<div class="auth-container">
+  <div class="glass-card auth-card">
+    <div class="auth-header">
+      <div class="email-icon">📧</div>
+      <h2>Verify Your Email</h2>
+      <p>We've sent a 6-digit code to</p>
+      <p class="email-display">{{ email }}</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #otpForm="ngForm">
+      <div class="form-group">
+        <label for="otp">Enter OTP Code</label>
+        <input
+          type="text"
+          id="otp"
+          name="otp"
+          [(ngModel)]="otp"
+          placeholder="000000"
+          maxlength="6"
+          pattern="[0-9]{6}"
+          required
+          [disabled]="loading"
+          class="otp-input"
+        />
+        <small class="input-hint">Check your email inbox (and spam folder)</small>
+      </div>
+
+      @if (errorMessage) {
+        <div class="error-message">
+          ⚠️ {{ errorMessage }}
+        </div>
+      }
+
+      @if (successMessage) {
+        <div class="success-message">
+          ✅ {{ successMessage }}
+        </div>
+      }
+
+      <button
+        type="submit"
+        class="btn-main btn-full"
+        [disabled]="loading || !otpForm.valid"
+      >
+        @if (loading) {
+          Verifying...
+        } @else {
+          Verify Email
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>
+        Didn't receive the code?
+        <button
+          type="button"
+          (click)="resendOTP()"
+          [disabled]="resending"
+          class="resend-btn"
+        >
+          @if (resending) {
+            Sending...
+          } @else {
+            Resend OTP
+          }
+        </button>
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,213 @@
+<!-- src/app/components/client-projects/client-projects.component.html -->
+<app-navbar></app-navbar>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<div class="client-container">
+  <!-- Header -->
+  <header class="page-header">
+    <div>
+      <h1>My Projects</h1>
+      <p>Welcome back, {{ currentUser?.name }}! Track your project requests here.</p>
+    </div>
+    <button class="btn-main" (click)="showCreateProject = true">
+      + Request New Project
+    </button>
+  </header>
+
+  @if (loading) {
+    <div class="glass-card loading-state">
+      <div class="spinner"></div>
+      <p>Loading your projects...</p>
+    </div>
+  } @else if (projects.length === 0) {
+    <!-- Empty State -->
+    <div class="glass-card empty-state">
+      <div class="empty-icon">📋</div>
+      <h2>No Project Requests Yet</h2>
+      <p>Start your first project with ServeX! Our team will review your request within 24 hours.</p>
+      <button class="btn-main" (click)="showCreateProject = true">Submit Project Request</button>
+    </div>
+  } @else {
+    <!-- Pending Requests -->
+    @if (pendingProjects.length > 0) {
+      <section class="project-section">
+        <h3 class="section-title">⏳ Pending Review ({{ pendingProjects.length }})</h3>
+        <div class="projects-grid">
+          @for (project of pendingProjects; track project.id) {
+            <div class="glass-card project-card pending-card">
+              <div class="project-header">
+                <h4>{{ project.name }}</h4>
+                <span [class]="getStatusClass(project.status)">
+                  {{ getStatusText(project.status) }}
+                </span>
+              </div>
+              <p class="project-description">{{ project.description }}</p>
+              <div class="project-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Service:</span>
+                  <span class="meta-value">{{ project.service }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Budget:</span>
+                  <span class="meta-value">{{ project.budget }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Submitted:</span>
+                  <span class="meta-value">{{ formatDate(project.createdAt) }}</span>
+                </div>
+              </div>
+              <div class="pending-message">
+                <p>🕐 Your request is being reviewed by our team. You'll receive an update within 24 hours.</p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Active Projects -->
+    @if (activeProjects.length > 0) {
+      <section class="project-section">
+        <h3 class="section-title">🚀 Active Projects ({{ activeProjects.length }})</h3>
+        <div class="projects-grid">
+          @for (project of activeProjects; track project.id) {
+            <div class="glass-card project-card active-card">
+              <div class="project-header">
+                <h4>{{ project.name }}</h4>
+                <span [class]="getStatusClass(project.status)">
+                  {{ getStatusText(project.status) }}
+                </span>
+              </div>
+              <p class="project-description">{{ project.description }}</p>
+              
+              <!-- Progress Bar -->
+              @if (project.progress !== undefined) {
+                <div class="progress-section">
+                  <div class="progress-header">
+                    <span>Progress</span>
+                    <span class="progress-percent">{{ project.progress }}%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="project.progress"></div>
+                  </div>
+                </div>
+              }
+
+              <div class="project-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Service:</span>
+                  <span class="meta-value">{{ project.service }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Budget:</span>
+                  <span class="meta-value">{{ project.amount || project.budget }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Started:</span>
+                  <span class="meta-value">{{ formatDate(project.createdAt) }}</span>
+                </div>
+              </div>
+
+              <!-- Files/Deliverables -->
+              @if (project.files && project.files.length > 0) {
+                <div class="files-section">
+                  <h5>📎 Deliverables ({{ project.files.length }})</h5>
+                  <div class="files-list">
+                    @for (file of project.files; track file.id) {
+                      <a [href]="file.url" target="_blank" class="file-item">
+                        <span>📄 {{ file.name }}</span>
+                        <span class="file-date">{{ formatDate(file.uploadedAt) }}</span>
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+
+              <button class="btn-main btn-view">View Details</button>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Completed Projects -->
+    @if (completedProjects.length > 0) {
+      <section class="project-section">
+        <h3 class="section-title">🎉 Completed Projects ({{ completedProjects.length }})</h3>
+        <div class="projects-grid">
+          @for (project of completedProjects; track project.id) {
+            <div class="glass-card project-card completed-card">
+              <div class="project-header">
+                <h4>{{ project.name }}</h4>
+                <span [class]="getStatusClass(project.status)">
+                  {{ getStatusText(project.status) }}
+                </span>
+              </div>
+              <p class="project-description">{{ project.description }}</p>
+              <div class="project-meta">
+                <div class="meta-item">
+                  <span class="meta-label">Completed:</span>
+                  <span class="meta-value">{{ formatDate(project.updatedAt) }}</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-label">Final Amount:</span>
+                  <span class="meta-value">{{ project.amount }}</span>
+                </div>
+              </div>
+              @if (project.files && project.files.length > 0) {
+                <div class="files-section">
+                  <h5>📦 Final Deliverables</h5>
+                  <div class="files-list">
+                    @for (file of project.files; track file.id) {
+                      <a [href]="file.url" target="_blank" class="file-item">
+                        <span>📄 {{ file.name }}</span>
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
+              <button class="btn-main btn-view">Download All</button>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Rejected Projects -->
+    @if (rejectedProjects.length > 0) {
+      <section class="project-section">
+        <h3 class="section-title">❌ Declined Requests ({{ rejectedProjects.length }})</h3>
+        <div class="projects-grid">
+          @for (project of rejectedProjects; track project.id) {
+            <div class="glass-card project-card rejected-card">
+              <div class="project-header">
+                <h4>{{ project.name }}</h4>
+                <span [class]="getStatusClass(project.status)">
+                  {{ getStatusText(project.status) }}
+                </span>
+              </div>
+              <p class="project-description">{{ project.description }}</p>
+              @if (project.adminNotes) {
+                <div class="admin-notes">
+                  <strong>Admin Note:</strong>
+                  <p>{{ project.adminNotes }}</p>
+                </div>
+              }
+              <button class="btn-main" (click)="showCreateProject = true">Submit New Request</button>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
+
+<!-- Create Project Modal -->
+@if (showCreateProject) {
+  <app-create-project
+    (close)="showCreateProject = false"
+    (projectCreated)="onProjectCreated()"
+  ></app-create-project>
+}

@@ -1,0 +1,162 @@
+/* src/app/components/services/services.component.css */
+.services-container {
+  padding: 8rem 5% 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header */
+.services-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.services-header h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.services-header p {
+  color: var(--text-gray);
+  font-size: 1.2rem;
+}
+
+/* Pricing Grid */
+.pricing-section {
+  margin-bottom: 4rem;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pricing-card {
+  padding: 2.5rem;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.pricing-card.popular {
+  background: white;
+  border: 2px solid var(--accent);
+  transform: scale(1.05);
+}
+
+.popular-badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.pricing-card h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: var(--text-dark);
+}
+
+.price {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+}
+
+.plan-description {
+  color: var(--text-gray);
+  margin-bottom: 2rem;
+}
+
+.features-list {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.features-list li {
+  padding: 0.8rem 0;
+  color: var(--text-gray);
+  position: relative;
+  padding-left: 2rem;
+}
+
+.features-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.btn-full {
+  width: 100%;
+  padding: 1rem;
+}
+
+.btn-popular {
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.4);
+}
+
+/* CTA Section */
+.cta-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cta-card {
+  text-align: center;
+  background: linear-gradient(135deg, var(--accent) 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  padding: 3rem;
+}
+
+.cta-card h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.cta-card p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.cta-card .btn-main {
+  background: white;
+  color: var(--accent);
+}
+
+.cta-card .btn-main:hover {
+  background: #f8fafc;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .services-header h1 {
+    font-size: 2.5rem;
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-card.popular {
+    transform: scale(1);
+  }
+}

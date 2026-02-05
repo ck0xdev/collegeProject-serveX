@@ -1,0 +1,283 @@
+/* src/app/components/dashboard/dashboard.component.css */
+.dashboard-container {
+  padding: 8rem 5% 3rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.dashboard-header p {
+  color: var(--text-gray);
+  font-size: 1rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  transition: transform 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  font-size: 3rem;
+}
+
+.stat-info h4 {
+  color: var(--text-gray);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* Activity Section */
+.activity-section {
+  margin-bottom: 3rem;
+}
+
+.activity-section h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-dark);
+}
+
+.table-container {
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.projects-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.projects-table thead tr {
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.projects-table th {
+  text-align: left;
+  padding: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.projects-table td {
+  padding: 1.2rem 1rem;
+  color: var(--text-dark);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.projects-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.projects-table tbody tr:hover {
+  background: rgba(14, 165, 233, 0.02);
+}
+
+.project-name {
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 0.25rem;
+}
+
+.project-desc {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+}
+
+.amount {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Status Badges */
+.badge {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.badge-active {
+  background: #dbeafe;
+  color: #0284c7;
+}
+
+.badge-pending {
+  background: #fef9c3;
+  color: #ca8a04;
+}
+
+.badge-completed {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.action-card {
+  padding: 2rem;
+  text-align: center;
+}
+
+.action-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.action-card p {
+  color: var(--text-gray);
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+  }
+
+  .dashboard-header h1 {
+    font-size: 2rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-container {
+    overflow-x: scroll;
+  }
+
+  .projects-table {
+    min-width: 600px;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header-with-action h3 {
+  font-size: 1.5rem;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.empty-state p {
+  color: var(--text-gray);
+  margin-bottom: 2rem;
+}
+
+/* Add these to the bottom of dashboard.component.css */
+
+.section-header-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.section-header-with-action h3 {
+  font-size: 1.5rem;
+  color: var(--text-dark);
+  margin: 0;
+}
+
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-dark);
+}
+
+.empty-state p {
+  color: var(--text-gray);
+  margin-bottom: 2rem;
+}
+
+.loading-state p {
+  color: var(--text-gray);
+  font-size: 1.1rem;
+}
