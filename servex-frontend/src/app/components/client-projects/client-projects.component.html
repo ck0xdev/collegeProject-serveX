@@ -202,6 +202,7 @@
       </section>
     }
   }
+  
 </div>
 
 <!-- Create Project Modal -->
@@ -210,4 +211,12 @@
     (close)="showCreateProject = false"
     (projectCreated)="onProjectCreated()"
   ></app-create-project>
+}
+
+<!-- ADD CHAT COMPONENT HERE -->
+@if (activeProjects.length > 0 && activeProjects[0]) {
+  <app-chat-box
+    [projectId]="activeProjects[0].id"
+    [projectName]="activeProjects[0].name"
+  ></app-chat-box>
 }

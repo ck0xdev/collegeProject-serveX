@@ -287,3 +287,10 @@
     </div>
   </div>
 }
+
+@if (selectedProject) {
+  <app-chat-box
+    [projectId]="selectedProject.id"
+    [projectName]="selectedProject.name"
+  ></app-chat-box>
+}

@@ -8,12 +8,13 @@ import { AuthService } from '../../services/auth.service';
 import { ProjectService } from '../../services/project.service';
 import { User } from '../../models/user.model';
 import { Project } from '../../models/project.model';
+import { ChatBoxComponent } from '../chat-box/chat-box.component';
 
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, RouterModule, FormsModule, NavbarComponent, ChatBoxComponent],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css',
 })

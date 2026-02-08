@@ -8,11 +8,12 @@ import { AuthService } from '../../services/auth.service';
 import { ProjectService } from '../../services/project.service';
 import { User } from '../../models/user.model';
 import { Project } from '../../models/project.model';
+import { ChatBoxComponent } from '../chat-box/chat-box.component';
 
 @Component({
   selector: 'app-client-projects',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavbarComponent, CreateProjectComponent],
+  imports: [CommonModule, RouterModule, NavbarComponent, CreateProjectComponent, ChatBoxComponent],
   templateUrl: './client-projects.component.html',
   styleUrl: './client-projects.component.css'
 })
