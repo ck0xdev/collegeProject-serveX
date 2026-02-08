@@ -1,392 +1,292 @@
 // src/controllers/auth.controller.js
+// ✅ CORRECT IMPORT: Get initialized db and admin from config
+const { admin, db } = require('../config/firebase.config'); 
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user.model');
-const { sendOTPEmail } = require('../config/email.config');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+// const User = require('../models/user.model'); // Optional if you use db directly
 
-// Generate OTP (6 digits)
+// Email Transporter Configuration
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+// Helper: Generate 6-digit OTP
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return crypto.randomInt(100000, 999999).toString();
 };
 
-// REGISTER - Create new user and send OTP
+// Helper: Generate JWT Token
+const generateToken = (user) => {
+  return jwt.sign(
+    { uid: user.id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+};
+
+// ==========================================
+// 1. REGISTER
+// ==========================================
 exports.register = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { name, email, password } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists with this email'
-      });
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+
+    if (doc.exists) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Generate OTP
     const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const otpExpires = Date.now() + 10 * 60 * 1000;
 
-    // Create user
-    const user = new User({
-      email,
+    const newUser = {
       name,
+      email,
       password: hashedPassword,
+      role: 'client',
+      isVerified: false,
       otp,
-      otpExpiry,
-      isVerified: false
+      otpExpires,
+      createdAt: new Date().toISOString()
+    };
+
+    await userRef.set(newUser);
+
+    await transporter.sendMail({
+      from: `"ServeX" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Verify your ServeX Account',
+      html: `<h3>Welcome to ServeX!</h3><p>Your verification code is: <b>${otp}</b></p><p>This code expires in 10 minutes.</p>`
     });
-
-    await user.save();
-
-    // Send OTP email
-    const emailResult = await sendOTPEmail(email, otp, name);
-
-    if (!emailResult.success) {
-      return res.status(500).json({
-        success: false,
-        message: 'User created but failed to send OTP email'
-      });
-    }
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful! Please check your email for OTP',
-      data: {
-        email,
-        name
-      }
+      message: 'Registration successful. Please check your email for OTP.'
     });
 
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Registration failed',
-      error: error.message
-    });
+    console.error('Register Error:', error);
+    res.status(500).json({ success: false, message: 'Server error during registration' });
   }
 };
 
-// VERIFY OTP
-exports.verifyOTP = async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    // Find user
-    const user = await User.findByEmail(email);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Check if already verified
-    if (user.isVerified) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already verified'
-      });
-    }
-
-    // Check OTP
-    if (user.otp !== otp) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid OTP'
-      });
-    }
-
-    // Check OTP expiry
-    if (new Date() > new Date(user.otpExpiry)) {
-      return res.status(400).json({
-        success: false,
-        message: 'OTP has expired'
-      });
-    }
-
-    // Update user as verified
-    await User.update(email, {
-      isVerified: true,
-      otp: null,
-      otpExpiry: null
-    });
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { email: user.email, name: user.name, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.status(200).json({
-      success: true,
-      message: 'Email verified successfully!',
-      data: {
-        token,
-        user: {
-          email: user.email,
-          name: user.name,
-          role: user.role
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('OTP verification error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'OTP verification failed',
-      error: error.message
-    });
-  }
-};
-
-// LOGIN
+// ==========================================
+// 2. LOGIN
+// ==========================================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
-    const user = await User.findByEmail(email);
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+
+    if (!doc.exists) {
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Check if verified
+    const user = doc.data();
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
+    }
+
     if (!user.isVerified) {
-      return res.status(403).json({
-        success: false,
-        message: 'Please verify your email first'
-      });
+      return res.status(403).json({ success: false, message: 'Please verify your email first' });
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { email: user.email, name: user.name, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = generateToken({ id: doc.id, ...user });
 
     res.status(200).json({
       success: true,
-      message: 'Login successful!',
-      data: {
-        token,
-        user: {
-          email: user.email,
-          name: user.name,
-          role: user.role
-        }
+      token,
+      user: {
+        id: doc.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
       }
     });
 
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Login failed',
-      error: error.message
-    });
+    console.error('Login Error:', error);
+    res.status(500).json({ success: false, message: 'Server error during login' });
   }
 };
 
-// RESEND OTP
-exports.resendOTP = async (req, res) => {
+// ==========================================
+// 3. VERIFY OTP
+// ==========================================
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+
+    if (!doc.exists) {
+      return res.status(400).json({ success: false, message: 'User not found' });
+    }
+
+    const user = doc.data();
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP' });
+    }
+
+    if (Date.now() > user.otpExpires) {
+      return res.status(400).json({ success: false, message: 'OTP expired' });
+    }
+
+    await userRef.update({
+      isVerified: true,
+      otp: null,
+      otpExpires: null
+    });
+
+    const token = generateToken({ id: doc.id, ...user, isVerified: true });
+
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully',
+      token,
+      user: { id: doc.id, name: user.name, email: user.email, role: user.role }
+    });
+
+  } catch (error) {
+    console.error('Verify OTP Error:', error);
+    res.status(500).json({ success: false, message: 'Server error during verification' });
+  }
+};
+
+// ==========================================
+// 4. RESEND OTP
+// ==========================================
+exports.resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
 
-    // Find user
-    const user = await User.findByEmail(email);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
+    if (!doc.exists) return res.status(404).json({ success: false, message: 'User not found' });
 
-    // Check if already verified
-    if (user.isVerified) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already verified'
-      });
-    }
-
-    // Generate new OTP
     const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    const otpExpires = Date.now() + 10 * 60 * 1000;
 
-    // Update user with new OTP
-    await User.update(email, { otp, otpExpiry });
+    await userRef.update({ otp, otpExpires });
 
-    // Send OTP email
-    const emailResult = await sendOTPEmail(email, otp, user.name);
-
-    if (!emailResult.success) {
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to send OTP email'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'New OTP sent successfully!'
+    await transporter.sendMail({
+      from: `"ServeX" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'New Verification Code',
+      html: `<h3>New Code</h3><p>Your new code is: <b>${otp}</b></p>`
     });
+
+    res.status(200).json({ success: true, message: 'OTP resent successfully' });
 
   } catch (error) {
-    console.error('Resend OTP error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to resend OTP',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
-// CREATE ADMIN - Special endpoint to create admin users
-exports.createAdmin = async (req, res) => {
-  try {
-    const { email, password, name, secretKey } = req.body;
-
-    // Secret key verification (for security)
-    const ADMIN_SECRET = process.env.ADMIN_SECRET || 'ServeX_Admin_2026_SuperSecret';
-    
-    if (secretKey !== ADMIN_SECRET) {
-      return res.status(403).json({
-        success: false,
-        message: 'Invalid admin secret key'
-      });
-    }
-
-    // Check if user already exists
-    const existingUser = await User.findByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists with this email'
-      });
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create admin user (no OTP verification needed)
-    const user = new User({
-      email,
-      name,
-      password: hashedPassword,
-      role: 'admin', // Set as admin
-      isVerified: true, // Auto-verify admin
-      otp: null,
-      otpExpiry: null
-    });
-
-    await user.save();
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { email: user.email, name: user.name, role: 'admin' },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    res.status(201).json({
-      success: true,
-      message: 'Admin account created successfully!',
-      data: {
-        token,
-        user: {
-          email: user.email,
-          name: user.name,
-          role: 'admin'
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('Admin creation error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create admin',
-      error: error.message
-    });
-  }
-  // GOOGLE SIGN-IN
+// ==========================================
+// 5. GOOGLE LOGIN
+// ==========================================
 exports.googleLogin = async (req, res) => {
   try {
-    const { uid, email, name, photoURL } = req.body;
+    const { idToken } = req.body;
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email is required'
-      });
-    }
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const { uid, email, name, picture } = decodedToken;
 
-    // Check if user exists
-    let user = await User.findByEmail(email);
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
 
-    if (!user) {
-      // Create new user (auto-verified since Google verified them)
-      const newUser = new User({
-        email,
+    let user;
+
+    if (!doc.exists) {
+      user = {
         name: name || 'Google User',
-        password: await bcrypt.hash(uid, 10), // Use uid as password (they won't use it)
+        email,
         role: 'client',
-        isVerified: true, // Auto-verify Google users
-        otp: null,
-        otpExpiry: null
-      });
-
-      await newUser.save();
-      user = await User.findByEmail(email);
+        isVerified: true,
+        authProvider: 'google',
+        photoUrl: picture,
+        createdAt: new Date().toISOString()
+      };
+      await userRef.set(user);
+    } else {
+      user = doc.data();
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { email: user.email, name: user.name, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const token = generateToken({ id: email, ...user });
 
     res.status(200).json({
       success: true,
-      message: 'Google sign-in successful!',
-      data: {
-        token,
-        user: {
-          email: user.email,
-          name: user.name,
-          role: user.role
-        }
+      token,
+      user: {
+        id: email,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        photoUrl: user.photoUrl
       }
     });
 
   } catch (error) {
-    console.error('Google login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Google sign-in failed',
-      error: error.message
-    });
+    console.error('Google Login Error:', error);
+    res.status(401).json({ success: false, message: 'Google authentication failed' });
   }
 };
+
+// ==========================================
+// 6. CREATE ADMIN
+// ==========================================
+exports.createAdmin = async (req, res) => {
+  try {
+    const { name, email, password, adminSecret } = req.body;
+
+    if (adminSecret !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ success: false, message: 'Invalid Admin Secret' });
+    }
+
+    const userRef = db.collection('users').doc(email);
+    const doc = await userRef.get();
+
+    if (doc.exists) {
+      return res.status(400).json({ success: false, message: 'Admin already exists' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const newAdmin = {
+      name,
+      email,
+      password: hashedPassword,
+      role: 'admin',
+      isVerified: true,
+      createdAt: new Date().toISOString()
+    };
+
+    await userRef.set(newAdmin);
+
+    res.status(201).json({ success: true, message: 'Admin account created successfully' });
+
+  } catch (error) {
+    console.error('Create Admin Error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 };

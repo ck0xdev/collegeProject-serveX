@@ -1,6 +1,6 @@
 // src/controllers/project.controller.js
 const Project = require('../models/project.model');
-const { db } = require('../config/firebase.config');
+const { admin, db } = require('../config/firebase.config');
 
 // Create new project
 exports.createProject = async (req, res) => {
